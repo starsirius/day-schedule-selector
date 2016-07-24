@@ -161,9 +161,21 @@
       var start, end;
       start = end = false; selections[v] = [];
       plugin.$el.find(".time-slot[data-day='" + v + "']").each(function () {
+
+        // Is this the first slot selected?
         if (isSlotSelected($(this)) && !start) { start = $(this).data('time'); }
-        else if (!isSlotSelected($(this)) && !!start) {
+
+        // Is this slot not selected, and we have seen the start of a selection?
+        // Then this is an interval to be serialized.
+        if (!isSlotSelected($(this)) && !!start) {
           end = $(this).data('time');
+          selections[v].push([start, end]);
+          start = end = false;
+        }
+        // Finally, have we seen the start of a selection and have reached the final row of this column?
+        // Then we have a completed interval.
+        else if (!!start && $(this).is($("tbody.schedule-rows tr:last > td:nth-child("+(2+v)+")"))) {
+          end = plugin.options.endTime;
           selections[v].push([start, end]);
           start = end = false;
         }
