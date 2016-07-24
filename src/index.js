@@ -5,7 +5,7 @@
     this.$el = $(el);
     this.options = $.extend({}, DayScheduleSelector.DEFAULTS, options);
     this.render();
-    this.attachEvents();
+    if(this.options.editable) { this.attachEvents(); }
     this.$selectingStart = null;
   }
 
@@ -14,6 +14,7 @@
     startTime   : '08:00',                // HH:mm format
     endTime     : '20:00',                // HH:mm format
     interval    : 30,                     // minutes
+    editable    : true,                   // false = view only mode
     template    : '<div class="day-schedule-selector">'         +
                     '<table class="schedule-table">'            +
                       '<thead class="schedule-header"></thead>' +
@@ -63,6 +64,9 @@
 
       $el.append('<tr><td class="time-label">' + hmmAmPm(d) + '</td>' + daysInARow + '</tr>');
     });
+
+    // If the selector is editable, the cursor should be a pointer.
+    if(this.options.editable) {  $("td.time-slot").css( 'cursor', 'pointer' ); }
   };
 
   /**
@@ -157,9 +161,21 @@
       var start, end;
       start = end = false; selections[v] = [];
       plugin.$el.find(".time-slot[data-day='" + v + "']").each(function () {
+
+        // Is this the first slot selected?
         if (isSlotSelected($(this)) && !start) { start = $(this).data('time'); }
-        else if (!isSlotSelected($(this)) && !!start) {
+
+        // Is this slot not selected, and we have seen the start of a selection?
+        // Then this is an interval to be serialized.
+        if (!isSlotSelected($(this)) && !!start) {
           end = $(this).data('time');
+          selections[v].push([start, end]);
+          start = end = false;
+        }
+        // Finally, have we seen the start of a selection and have reached the final row of this column?
+        // Then we have a completed interval.
+        else if (!!start && $(this).is($("tbody.schedule-rows tr:last > td:nth-child("+(2+v)+")"))) {
+          end = plugin.options.endTime;
           selections[v].push([start, end]);
           start = end = false;
         }
