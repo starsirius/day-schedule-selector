@@ -41,6 +41,22 @@ default: `30`
 
 An integer value representing length of each time slot, in minutes.
 
+#### initialTimes
+default: `{0:[],1:[],2:[],3:[],4:[],5:[],6:[]}`
+
+the timeslots that are selected by default
+0-6 each repesent days of the week and each day is a list
+`{
+        0: [],
+        1: [["15:00", "16:30"]],
+        2: [],
+        3: [],
+        4: [],
+        5: [["09:00", "12:30"], ["15:00", "16:30"]],
+        6: []
+      }`
+this would insert 3 timeslots 15:00-16:30 on monday, 09:00-12:30 on friday and 15:00-16:30 on friday
+
 ## Events
 The following custom events are triggered on the element.
 
